@@ -222,3 +222,4 @@ node_modules/
 .vite/
 .cache/
 .vscode/*
+client_secrets.json
