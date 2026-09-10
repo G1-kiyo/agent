@@ -1,0 +1,150 @@
+/* 全局 Loading 容器样式 */
+#global-loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+#global-loading-container > * {
+  pointer-events: auto;
+}
+
+/* ============================================
+   Loading 组件样式
+   ============================================ */
+
+/* Loading 容器 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* 遮罩层样式 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(7, 17, 31, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+}
+
+/* Loading 旋转器 */
+.loading-spinner {
+  display: inline-block;
+  position: relative;
+}
+
+.loading-ring {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: loading-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: var(--accent) transparent transparent transparent;
+}
+
+.loading-ring:nth-child(1) {
+  animation-delay: -0.45s;
+}
+
+.loading-ring:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.loading-ring:nth-child(3) {
+  animation-delay: -0.15s;
+}
+
+@keyframes loading-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 尺寸变体 */
+.loading-small {
+  width: 20px;
+  height: 20px;
+}
+
+.loading-small .loading-ring {
+  border-width: 2px;
+}
+
+.loading-medium {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-medium .loading-ring {
+  border-width: 3px;
+}
+
+.loading-large {
+  width: 60px;
+  height: 60px;
+}
+
+.loading-large .loading-ring {
+  border-width: 4px;
+}
+
+.loading-full {
+  width: 80px;
+  height: 80px;
+}
+
+.loading-full .loading-ring {
+  border-width: 5px;
+}
+
+/* 文字样式 */
+.loading-text {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.loading-small .loading-text {
+  font-size: 12px;
+}
+
+.loading-medium .loading-text {
+  font-size: 14px;
+}
+
+.loading-large .loading-text {
+  font-size: 16px;
+}
+
+.loading-full .loading-text {
+  font-size: 18px;
+}
+
+/* 行内 Loading */
+.inline-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-loading .loading-text {
+  color: var(--muted);
+}

@@ -1,0 +1,59 @@
+/* 知识库页面专属样式（页面级容器与三栏布局骨架）
+   各子组件（TopicSidebar / RagSearch / QaConversation / DocumentList /
+   KnowledgeHeader）的样式已就近放在 components/*/ 下。 */
+
+.knowledge-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.knowledge-header h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.knowledge-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* 三栏布局 */
+.knowledge-body {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.knowledge-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 响应式：知识库三栏退化为单栏 */
+@media (max-width: 640px) {
+  .knowledge-body {
+    flex-direction: column;
+  }
+
+  .topic-sidebar {
+    width: 100%;
+  }
+
+  .knowledge-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .knowledge-header-stats {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}

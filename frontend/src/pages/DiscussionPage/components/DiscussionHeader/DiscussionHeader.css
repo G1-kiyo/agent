@@ -1,0 +1,523 @@
+/* 讨论头部组件样式 - 重新设计 */
+
+/* 主容器 */
+.discussion-header {
+  margin-bottom: 24px;
+  /* padding: 24px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px; */
+}
+
+/* 标题区域 */
+.discussion-header .title-section {
+  margin-bottom: 24px;
+}
+
+.discussion-header .topic-title {
+  margin: 0 0 12px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.discussion-header .title-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.discussion-header .meta-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 状态标签 */
+.discussion-header .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.discussion-header .status-badge.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* 分类标签 */
+.discussion-header .category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  font-weight: 500;
+}
+
+/* 统计卡片容器 */
+.discussion-header .stats-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.discussion-header .stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--hover);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  min-width: 50px;
+}
+
+.discussion-header .stat-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+
+.discussion-header .stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* 描述区域 */
+.discussion-header .description-section {
+  margin-bottom: 20px;
+}
+
+.discussion-header .topic-description {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 详细信息区域 */
+.discussion-header .detail-section {
+  margin-bottom: 20px;
+}
+
+.discussion-header .info-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.discussion-header .info-item:last-child {
+  margin-bottom: 0;
+}
+
+.discussion-header .info-label {
+  color: var(--text-secondary);
+  min-width: fit-content;
+}
+
+.discussion-header .info-value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* 标签区域 */
+.discussion-header .tags-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.discussion-header .topic-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border: 1px solid var(--line);
+}
+
+/* 加载和错误状态 */
+.discussion-header .loading,
+.discussion-header .error {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.discussion-header .error {
+  color: #ef4444;
+}
+
+.discussion-header .status-badge.muted {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.discussion-header .status-badge.info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* 迷你统计（在标题行） */
+.discussion-header .mini-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.discussion-header .mini-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-width: 45px;
+}
+
+.discussion-header .mini-stat-number {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.discussion-header .mini-stat-label {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* 描述部分 */
+.discussion-header .description-section {
+  margin-bottom: 24px;
+}
+
+.discussion-header .topic-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* 底部信息行 */
+.discussion-header .bottom-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+/* 基本信息 */
+.discussion-header .basic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.discussion-header .info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.discussion-header .info-label {
+  color: var(--muted);
+  min-width: 80px;
+  font-size: 14px;
+}
+
+.discussion-header .info-value {
+  color: var(--text);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.discussion-header .fork-info {
+  padding: 6px 12px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 6px;
+}
+
+/* 详细统计 */
+.discussion-header .detailed-stats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.discussion-header .detailed-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 70px;
+}
+
+.discussion-header .detailed-stat-number {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.discussion-header .detailed-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 标签部分 */
+.discussion-header .tags-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.discussion-header .topic-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 加载和错误状态 */
+.discussion-header .loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.discussion-header .error {
+  padding: 20px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .discussion-header .title-section {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .discussion-header .status-section {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .discussion-header .bottom-info {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .discussion-header .detailed-stats {
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 480px) {
+  .discussion-header {
+    padding: 16px;
+  }
+  
+  .discussion-header .topic-title {
+    font-size: 24px;
+  }
+  
+  .discussion-header .mini-stats {
+    gap: 8px;
+  }
+  
+  .discussion-header .detailed-stats {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .discussion-header .detailed-stat {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .header-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .topic-title {
+    margin-left: 0;
+  }
+  
+  .topic-meta {
+    grid-template-columns: 1fr;
+  }
+  
+  .topic-stats {
+    flex-wrap: wrap;
+  }
+  
+  .topic-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .discussion-header {
+    padding: 16px;
+  }
+  
+  .topic-title {
+    font-size: 20px;
+  }
+  
+  .stat-item {
+    padding: 6px 12px;
+    min-width: 50px;
+  }
+  
+  .stat-number {
+    font-size: 16px;
+  }
+}
+
+/* 优先级徽章样式 */
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 参与度徽章样式 */
+.engagement-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  font-weight: 600;
+}
+
+.engagement-badge.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.engagement-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.engagement-badge.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.engagement-badge.muted {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+/* 参与行布局优化 */
+.engagement-row {
+  align-items: center;
+}
+
+.priority-badge.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.priority-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.priority-badge.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.priority-badge.muted {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+/* 元信息行布局优化 */
+.topic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.meta-label {
+  color: var(--muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.meta-value {
+  color: var(--text);
+  font-weight: 500;
+  word-break: break-word;
+}

@@ -1,0 +1,154 @@
+/* 首页专属样式：核心体验卡片 + 互动聊天 + 产品流程 */
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.hero-card {
+  padding: 16px;
+}
+
+.highlight-card {
+  background: linear-gradient(135deg, rgba(110, 231, 249, 0.16), rgba(124, 147, 255, 0.12));
+}
+
+.hero-card h3 {
+  margin: 6px 0 8px;
+  font-size: 19px;
+}
+
+.hero-card p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.topic-list, .workflow-list {
+  display: grid;
+  gap: 10px;
+}
+
+.topic-card, .workflow-card {
+  padding: 12px 14px;
+}
+
+.topic-card h4, .workflow-card h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.topic-card p, .workflow-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr;
+  gap: 18px;
+}
+
+.chat-card, .insight-card {
+  padding: 18px;
+}
+
+.chat-header, .insight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.status-pill, .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(52, 211, 153, 0.16);
+  color: var(--success);
+}
+
+.message-list {
+  display: grid;
+  gap: 12px;
+  min-height: 360px;
+  max-height: 440px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.message {
+  max-width: 86%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message.user {
+  justify-self: end;
+  background: linear-gradient(135deg, var(--accent-2), #5d7bff);
+  color: white;
+}
+
+.message.assistant {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.message .meta {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.quick-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 12px;
+}
+
+/* 首页卡片容器（与布局外壳共用圆角/阴影规范） */
+.hero-card, .chat-card, .insight-card, .topic-card, .workflow-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* 响应式：首页栅格退化为单栏 */
+@media (max-width: 1024px) {
+  .content-grid, .hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1080px) {
+  .hero-grid, .content-grid {
+    grid-template-columns: 1fr;
+  }
+}

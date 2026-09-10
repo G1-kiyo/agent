@@ -1,0 +1,341 @@
+/* 综合搜索结果容器 */
+.comprehensive-results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* 检索结果模块 - 外层容器 */
+.search-results-section {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 区域头部样式 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 2px solid rgba(96, 165, 250, 0.5);
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+
+/* 检索状态指示器 */
+.searching-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  padding: 4px 10px;
+  background: rgba(110, 231, 249, 0.3);
+  border-radius: 20px;
+  border: 1px solid rgba(110, 231, 249, 0.4);
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(110, 231, 249, 0.6);
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 检索到的具体数据模块 - 固定高度，可滚动 */
+.search-data-module {
+  background: rgba(96, 165, 250, 0.08);
+  margin: 16px 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.search-data-module.collapsed {
+  max-height: 41px;
+}
+
+.search-data-module.expanded {
+  max-height: 500px;
+}
+
+/* 检索数据头部样式 */
+.search-data-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(96, 165, 250, 0.9);
+  background: rgba(96, 165, 250, 0.15);
+  cursor: pointer;
+}
+
+.collapse-arrow {
+  font-size: 12px;
+  color: rgba(96, 165, 250, 0.8);
+  transition: transform 0.3s ease;
+}
+
+.search-data-module.collapsed .collapse-arrow {
+  transform: rotate(-90deg);
+}
+
+.search-data-module.expanded .collapse-arrow {
+  transform: rotate(0deg);
+}
+
+.search-data-content {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(96, 165, 250, 0.05);
+  transition: opacity 0.3s ease;
+}
+
+.search-data-module.collapsed .search-data-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.search-data-module.expanded .search-data-content {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 自定义滚动条样式 */
+.search-data-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-data-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.search-data-content::-webkit-scrollbar-thumb {
+  background: rgba(96, 165, 250, 0.4);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.search-data-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 165, 250, 0.6);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* 滚动提示 */
+.scroll-hint {
+  padding: 8px 18px;
+  background: rgba(96, 165, 250, 0.15);
+  border-top: 1px solid rgba(96, 165, 250, 0.5);
+  text-align: center;
+}
+
+.scroll-hint-text {
+  font-size: 12px;
+  color: rgba(96, 165, 250, 0.9);
+  font-weight: 600;
+  animation: scrollHint 2s ease-in-out infinite;
+}
+
+@keyframes scrollHint {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 汇总报告模块 - 动态高度 */
+.summary-report-module {
+  padding: 0;
+  margin: 0 20px 0;
+}
+
+.summary-report-content {
+  padding: 16px 0;
+  background: transparent;
+}
+
+/* Markdown内容样式 */
+.comprehensive-results h1,
+.comprehensive-results h2,
+.comprehensive-results h3,
+.comprehensive-results h4,
+.comprehensive-results h5,
+.comprehensive-results h6 {
+  margin: 16px 0 8px;
+  color: var(--text);
+}
+
+.comprehensive-results h1 { font-size: 20px; }
+.comprehensive-results h2 { font-size: 18px; }
+.comprehensive-results h3 { font-size: 16px; }
+.comprehensive-results h4 { font-size: 15px; }
+.comprehensive-results h5 { font-size: 14px; }
+.comprehensive-results h6 { font-size: 13px; }
+
+.comprehensive-results p {
+  margin: 8px 0;
+  color: var(--muted);
+}
+
+.comprehensive-results ul,
+.comprehensive-results ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.comprehensive-results li {
+  margin: 4px 0;
+  color: var(--muted);
+}
+
+.comprehensive-results blockquote {
+  margin: 16px 0;
+  padding: 12px 16px;
+  background: rgba(110, 231, 249, 0.08);
+  border-left: 4px solid var(--accent);
+  color: var(--muted);
+}
+
+.comprehensive-results code {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.comprehensive-results pre {
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.comprehensive-results pre code {
+  padding: 0;
+  background: none;
+  color: #fff;
+}
+
+.comprehensive-results a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.comprehensive-results a:hover {
+  text-decoration: underline;
+}
+
+.comprehensive-results strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+
+
+
+
+
+
+
+
+/* 特殊样式 */
+.comprehensive-results .emoji {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .comprehensive-results {
+    gap: 16px;
+  }
+  
+  .section-header {
+    padding: 10px 12px;
+  }
+  
+  .section-header h3 {
+    font-size: 14px;
+  }
+  
+  .search-data-content {
+    height: 300px;
+  }
+  
+  .summary-report-content {
+    padding: 12px;
+  }
+}
+
+/* 检索数据模块内的蓝色主题样式 */
+.search-data-content h1,
+.search-data-content h2,
+.search-data-content h3,
+.search-data-content h4,
+.search-data-content h5,
+.search-data-content h6 {
+  color: rgba(96, 165, 250, 0.9);
+  font-weight: 550;
+}
+
+.search-data-content code {
+  color: rgba(96, 165, 250, 0.9);
+}
+
+.search-data-content a {
+  color: rgba(96, 165, 250, 0.9);
+}
+
+.search-data-content a:hover {
+  text-decoration: underline;
+}
+
+.search-data-content blockquote {
+  background: rgba(96, 165, 250, 0.08);
+  border-left: 4px solid rgba(96, 165, 250, 0.5);
+  color: var(--muted);
+}
+
+.search-data-content .markdown-link {
+  color: rgba(96, 165, 250, 0.9);
+}

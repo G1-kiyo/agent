@@ -1,0 +1,146 @@
+/**
+ * 用户头像组件样式
+ */
+
+/* 用户区域容器 */
+.user-section {
+  position: relative;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* 头像按钮容器 */
+.user-avatar-container {
+  position: relative;
+}
+
+/* 头像按钮 */
+.user-avatar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.user-avatar:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.user-avatar:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.user-avatar.menu-open {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.user-avatar:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 头像圆形 */
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 18px;
+  color: #07111f;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* 登录图标 */
+.login-icon {
+  font-size: 20px;
+}
+
+/* 用户信息 */
+.user-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 菜单箭头 */
+.menu-arrow {
+  font-size: 10px;
+  color: var(--muted);
+  transition: transform 0.2s;
+  margin-left: 4px;
+}
+
+.user-avatar.menu-open .menu-arrow {
+  transform: rotate(180deg);
+}
+
+/* 加载状态 */
+.user-avatar.loading {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.user-avatar-container .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(7, 17, 31, 0.2);
+  border-top-color: #07111f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .user-avatar {
+    padding: 8px 10px;
+  }
+
+  .avatar-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .user-name {
+    font-size: 13px;
+  }
+
+  .user-email {
+    font-size: 11px;
+  }
+}

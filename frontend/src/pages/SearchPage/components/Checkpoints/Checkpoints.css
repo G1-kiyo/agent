@@ -1,0 +1,71 @@
+.checkpoints {
+  margin-bottom: 24px;
+}
+
+.checkpoint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.fork-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.checkpoint-list {
+  display: grid;
+  gap: 4px;
+}
+
+.checkpoint-tree {
+  width: 100%;
+}
+
+.checkpoint-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px 10px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.checkpoint-item:hover {
+  background: rgba(110, 231, 249, 0.08);
+}
+
+.checkpoint-item.selected {
+  background: rgba(110, 231, 249, 0.16);
+  border-color: var(--accent);
+}
+
+.checkpoint-icon {
+  margin-right: 8px;
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+.checkpoint-name {
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+}
+
+.checkpoint-time {
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 12px;
+}
+
+.checkpoint-children {
+  margin-top: 4px;
+  border-left: 1px solid var(--line);
+  padding-left: 8px;
+}

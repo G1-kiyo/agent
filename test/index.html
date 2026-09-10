@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 资讯协作平台</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+const lastIndex = conversations.length-1
+        console.log("conversation",text,conversations,lastIndex)
+        const latestConversation = conversations[lastIndex]
+        let newConversation = { role: 'assistant', content: "", sources: [] }
+        if(latestConversation.role==="assistant"){
+            newConversation.content += text
+        }
+        setConversations((prev) => [
+          ...prev,
+          newConversation
+        ])

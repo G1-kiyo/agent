@@ -1,0 +1,158 @@
+name: agent
+
+services:
+    backend:
+        build:
+            context: backend
+            dockerfile: Dockerfile
+        volumes:
+            - ./backend:/app
+        ports:
+            - "5173:5173"
+        env_file:
+            - ./.env
+        command: fastapi dev main.py --host 0.0.0.0 --port 5173
+        environment:
+            - WATCHFILES_FORCE_POLLING=true
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            qdrant:
+                condition: service_started
+            kafka:
+                condition: service_started
+            kafka_connect:
+                condition: service_started
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:5173/health" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    frontend:
+        build:
+            context: frontend
+            dockerfile: Dockerfile
+        volumes:
+            - ./frontend:/app
+            - /app/node_modules
+        ports:
+            - "3000:3000"
+        command: npm run dev
+        environment:
+            - WATCHFILES_FORCE_POLLING=true
+        depends_on:
+            backend:
+                condition: service_healthy
+
+    db:
+        image: quay.io/debezium/postgres:16-alpine  # 使用兼容版本
+        restart: unless-stopped
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        env_file:
+            - .env
+        # 给宿主机外部访问
+        ports:
+            - "5432:5432"
+        expose:
+            - "5432"
+        command: >
+            postgres 
+            -c wal_level=logical 
+            -c max_replication_slots=10 
+            -c max_wal_senders=10 
+            -c output_plugin_libraries=pgoutput,test_decoding,decoderbufs
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    
+    celery_worker:
+        build:
+            context: backend
+            dockerfile: Dockerfile
+        volumes:
+            - ./backend:/app
+        env_file:
+            - ./.env
+        command: celery -A celery_app worker -l INFO
+        environment:
+            - WATCHFILES_FORCE_POLLING=true
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            qdrant:
+                condition: service_started
+            kafka:
+                condition: service_started
+            kafka_connect:
+                condition: service_started
+
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        expose:
+            - "6379"
+        volumes:
+            - redis_data:/data
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+    qdrant:
+        image: qdrant/qdrant:v1.18.0
+        restart: unless-stopped
+        ports:
+            - "6333:6333"
+            - "6334:6334"
+        expose:
+            - "6333"
+            - "6334"
+        volumes:
+            - qdrant_data:/qdrant/storage
+
+    kafka:
+        image: quay.io/debezium/kafka:3.6
+        restart: unless-stopped
+        ports:
+            - "9092:9092"
+        env_file:
+            - .env
+    kafka_connect:
+        image: quay.io/debezium/connect:3.6
+        restart: unless-stopped
+        ports:
+            - "8083:8083"
+        env_file:
+            - .env
+        depends_on:
+            - kafka
+
+    kafka_connect_setup:
+        image: curlimages/curl:latest
+        depends_on:
+            - kafka_connect
+        entrypoint: /bin/sh
+        command: /scripts/setup_kafka_connector.sh
+        volumes:
+            - ./scripts:/scripts:ro
+        
+
+
+
+
+volumes:
+    postgres_data:
+    redis_data:
+    qdrant_data:
+

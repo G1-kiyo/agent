@@ -1,0 +1,53 @@
+.knowledge-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.knowledge-header-title h3 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.knowledge-header-title p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.knowledge-header-stats {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.knowledge-stat-card {
+  padding: 8px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  min-width: 90px;
+  text-align: center;
+}
+
+.knowledge-stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.knowledge-stat-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.knowledge-upload-btn {
+  white-space: nowrap;
+}
