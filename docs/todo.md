@@ -805,6 +805,15 @@ select content where id scalar
 调用接口，成功之后就跳转到discussion的页面 window.location.href discussion.html
 
 待实现13
+创建github actions 从分支提交触发工作流到构建镜像再到部署
+在项目根目录创建.github/workflows/agent-build-deployment.yml
+需要包括lint校验和前后端test再build 再deploy
+
+lint
+
+
+
+待实现13
 完善分叉的信息展示
 首页的调整
 知识的处理
