@@ -1,5 +1,5 @@
 import { NAV_ITEMS, getNavByKey } from '../config/nav'
-import { UserAvatar } from '../components'
+import { UserAvatar } from '@components/index'
 
 /**
  * 共享布局：侧边栏 + 顶部栏。

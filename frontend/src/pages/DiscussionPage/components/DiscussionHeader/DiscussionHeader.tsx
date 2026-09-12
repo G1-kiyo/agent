@@ -1,5 +1,3 @@
-import React from 'react'
-import { useDiscussionState } from '../../hooks'
 import './DiscussionHeader.css'
 
 /**
@@ -28,7 +26,7 @@ export const DiscussionHeader = ({ discussion, loading, error }) => {
 
     const date = new Date(timestamp)
     const now = new Date()
-    const diff = now - date
+    const diff = now.getTime() - date.getTime()
 
     if (diff < 60000) {
       return '刚刚活跃'

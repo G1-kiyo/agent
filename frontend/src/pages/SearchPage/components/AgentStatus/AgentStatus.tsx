@@ -1,4 +1,3 @@
-import React from 'react'
 import './AgentStatus.css'
 
 export const AgentStatus = ({ iterationCount, isSearching }) => {

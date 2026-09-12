@@ -1,4 +1,3 @@
-import React from 'react'
 import './SearchStatus.css'
 
 export const SearchStatus = ({ status, iterationCount, searchTime, isSearching }) => {

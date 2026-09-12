@@ -12,7 +12,8 @@
       "@hooks/*":["./src/hooks/*"],
       "@pages/*":["./src/pages/*"],
       "@store/*":["./src/store/*"],
-      "@utils/*":["./src/utils/*"]
+      "@utils/*":["./src/utils/*"],
+      "@styles/*":["./src/styles/*"]
     },
     // Environment Settings
     // See also https://aka.ms/tsconfig/module

@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react'
-import { discussionApi } from '../../../../api/discussion'
-import { Pagination } from '../../../../components'
+import { useState, useEffect } from 'react'
+import { discussionApi } from '@api/index'
+import { Pagination } from '@components/index'
 import { DiscussionCategory, DiscussionSort } from "../../const"
 import './HistoricalTopics.css'
 
@@ -16,6 +16,7 @@ export const HistoricalTopics = ({
   resetFilterCondition,
   onSelectTopic,
   onCreateTopic,
+  onPageChange,
 }) => {
   const [expandedTopicId, setExpandedTopicId] = useState(null)
   const [isCreating, setIsCreating] = useState(false)
@@ -311,9 +312,7 @@ export const HistoricalTopics = ({
       <Pagination
         currentPage={pageNum}
         totalPages={Math.ceil(total / pageSize)}
-        onPageChange={(page) => getHistoricalTopics({
-          filterCategory, sortBy, searchTerm, pageSize, pageNum: page
-        })}
+        onPageChange={onPageChange}
       >
 
       </Pagination>

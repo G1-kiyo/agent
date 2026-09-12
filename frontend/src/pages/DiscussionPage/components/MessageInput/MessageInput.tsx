@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import './MessageInput.css'
 
 /**
@@ -11,7 +11,6 @@ export const MessageInput = ({
   onCancel,
   initialContent = '',
   userAvatar = null,
-  userId = null, 
   userName = '',
   showUserAvatar = true
 }) => {

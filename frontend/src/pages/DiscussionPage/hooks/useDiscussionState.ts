@@ -1,4 +1,4 @@
-import { useState, useCallback} from 'react'
+import { useState, useCallback } from 'react'
 import { discussionApi } from '@api/index'
 import { mockDiscussion } from '../mockData'
 import { DiscussionCategory, DiscussionSort } from "../const"
@@ -32,20 +32,26 @@ export const useDiscussionState = () => {
 
   // 监听查询条件变更
   const updateFilterCondition = useCallback((key, value) => {
-    console.log("fliter",key,value)
+    console.log("fliter", key, value)
     setFilterCondition(prev => ({ ...prev, [key]: value }))
     getHistoricalTopics({ ...filterCondition, [key]: value, pageSize: topicListStats.pageSize, pageNum: 1, })
   }, [filterCondition, topicListStats.pageSize])
 
   // 重置查询条件
   const resetFilterCondition = useCallback(() => {
-    setFilterCondition({
+    const filterCondition = {
       filterCategory: DiscussionCategory.ALL,
       sortBy: DiscussionSort.CREATE_AT,
       searchTerm: '',
-    })
-    getHistoricalTopics({ filterCategory: DiscussionCategory.ALL, sortBy: DiscussionSort.CREATE_AT, searchTerm: '', pageSize: topicListStats.pageSize, pageNum: 1 })
+    }
+    setFilterCondition(filterCondition)
+    getHistoricalTopics({ ...filterCondition, pageSize: topicListStats.pageSize, pageNum: 1 })
   }, [])
+
+  // 翻页查询
+  const onPageChange = useCallback((page) => {
+    getHistoricalTopics({ ...filterCondition, pageSize: topicListStats.pageSize, pageNum: page })
+  }, [filterCondition,topicListStats])
 
   // 请求历史话题列表
   const getHistoricalTopics = useDebounce(async ({ filterCategory, sortBy, searchTerm, pageSize, pageNum = 1 }) => {
@@ -244,6 +250,7 @@ export const useDiscussionState = () => {
     resetFilterCondition,
     onCreateTopic,
     getHistoricalTopics,
+    onPageChange,
 
     // AI辩论状态
     aiDebateActive,

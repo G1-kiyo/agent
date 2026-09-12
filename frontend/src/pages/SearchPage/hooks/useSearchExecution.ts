@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useTypewriter, useSSEStream } from '@hooks/index'
-import { ITERATION_LIMIT } from '@consts/index'
+import { ITERATION_LIMIT } from '@/consts/index'
 import { newsApi } from '@api/index'
 
 // 智能检索执行 hook（智能检索页面专属）

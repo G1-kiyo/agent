@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 // import remarkGfm from 'remark-gfm'
 // import rehypeHighlight from 'rehype-highlight'
-import { ITERATION_LIMIT } from '../../../../consts'
-import { MarkdownResults } from '../../../../components';
+import { ITERATION_LIMIT } from '@consts/index'
+import { MarkdownResults } from '@components/index';
 import './ComprehensiveResults.css'
 
 // 代码高亮主题CSS

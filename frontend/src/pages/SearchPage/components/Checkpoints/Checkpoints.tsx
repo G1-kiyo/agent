@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import './Checkpoints.css'
 
 // 递归渲染checkpoint树

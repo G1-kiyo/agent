@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { SearchComponents } from './components'
-import { DocumentUploader } from '../../components'
+import { DocumentUploader } from '@components/index'
 import { useSearchExecution, useCheckpoints } from './hooks'
 import { useDocumentUpload } from '../../hooks'
-import { mockSearchResults, mockSummaryReport } from './components/ComprehensiveResults/data/mockData'
 import './SearchPage.css'
-import { discussionApi } from '../../api/discussion'
+import { discussionApi } from '@api/index'
 import { ForkType } from '../DiscussionPage/const'
 
 export const SearchPage = () => {

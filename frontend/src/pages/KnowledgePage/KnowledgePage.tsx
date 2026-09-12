@@ -1,7 +1,7 @@
 import { KnowledgeComponents } from './components'
-import { DocumentUploader } from '../../components'
+import { DocumentUploader } from '@components/index'
 import { useRagConversation, useKnowledgeDocuments } from './hooks'
-import { useDocumentUpload } from '../../hooks'
+import { useDocumentUpload } from '@hooks/index'
 import './KnowledgePage.css'
 
 export const KnowledgePage = () => {
@@ -11,8 +11,14 @@ export const KnowledgePage = () => {
   // - useDocumentUpload：上传 Modal、进度、AI 提取（上传结果通过 onUploaded 回交列表）
   const { documentInfo, topics, stats, selectedTopic, fetchDataCallback, deleteDocument, filterByTopic } =
     useKnowledgeDocuments()
-  const { isUploaderOpen, setIsUploaderOpen, uploadProgress, isUploading, extractDocumentMeta, uploadDocuments } =
-    useDocumentUpload({ onUploaded: (pageNum) => { setTimeout(() => { fetchDataCallback(pageNum) }, 3000) } })
+  const {
+    isUploaderOpen,
+    setIsUploaderOpen,
+    uploadProgress,
+    isUploading,
+    extractDocumentMeta,
+    uploadDocuments,
+  } = useDocumentUpload({ onUploaded: (pageNum) => { setTimeout(() => { fetchDataCallback(pageNum) }, 3000) } })
   const { query, setQuery, conversations, streamingAnswer, isQuerying, executeRagQuery } =
     useRagConversation()
 
@@ -53,7 +59,6 @@ export const KnowledgePage = () => {
         onDelete={deleteDocument}
         fetchDataCallback={fetchDataCallback}
         documentInfo={documentInfo}
-        stats={stats}
       />
 
       <DocumentUploader

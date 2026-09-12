@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { usePagination } from '../../../../hooks'
-import { knowledgeApi } from '../../../../api'
+import { useCallback, useEffect, } from 'react'
+import { usePagination } from '@hooks/index'
 import './DocumentList.css'
-import { Pagination } from '../../../../components'
+import { Pagination } from '@components/index'
 
 // 职责：文档列表（核心持久化实体展示 + 筛选/排序/删除）
 export const DocumentList = ({ selectedTopic, onDelete, fetchDataCallback, documentInfo }) => {

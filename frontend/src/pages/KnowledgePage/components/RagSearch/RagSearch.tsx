@@ -1,4 +1,3 @@
-import React from 'react'
 import { mockRagSuggestions } from '../DocumentList/data/mockData'
 import './RagSearch.css'
 
@@ -39,7 +38,7 @@ export const RagSearch = ({ query, setQuery, onSearch, isQuerying }) => {
           <span
             key={index}
             className="rag-suggestion"
-            onClick={() => !disabled && handleSuggestionClick(suggestion)}
+            onClick={() => !isQuerying && handleSuggestionClick(suggestion)}
           >
             {suggestion}
           </span>

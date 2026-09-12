@@ -1,6 +1,4 @@
-import React, { useState } from 'react'
 import './SearchForm.css'
-import { newsApi } from '../../../../api'
 
 const searchExamples = [
   '最近一周AI领域有什么融资新闻？',

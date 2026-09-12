@@ -9,11 +9,10 @@ export const DocumentUploader = ({
   isOpen,
   mode = 'upload',
   uploadProgress,
-  savedFiles,
+  savedFiles = [],
   isUploading,
   onUpload,          // mode='upload' 批量上传：(fileItems) => Promise
   onExtract,         // mode='upload' AI 提取：(file) => Promise<{title, summary, tags}>
-  onSave,
   onClose
 }) => {
   const fileInputRef = useRef(null)

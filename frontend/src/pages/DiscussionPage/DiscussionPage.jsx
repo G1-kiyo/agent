@@ -20,7 +20,7 @@ import { ReactionOperateType, ForkType } from './const'
 const discussionId = new URLSearchParams(window.location.search).get("discussion_id")
 export const DiscussionPage = () => {
   // 使用讨论状态钩子
-  const { discussion, error, loading, getDiscussionById, historicalTopics, topicListStats, filterCondition, updateFilterCondition, resetFilterCondition, onCreateTopic, getHistoricalTopics } = useDiscussionState()
+  const { discussion, error, loading, getDiscussionById, historicalTopics, topicListStats, filterCondition, updateFilterCondition, resetFilterCondition, onCreateTopic, getHistoricalTopics, onPageChange } = useDiscussionState()
   const { messages, lastMessageId, setMessages, loading: messagesLoading, sendMessage, replyToMessage, reactToMessage, scrollToTargetIndex, initMessages } = useMessages()
   const { userVotes, toggleVote, isVoting, initUserVotes } = useVoting()
   const { forkDiscussion, isForking, forkHistory, initForkHistory } = useForkDiscussion()
@@ -392,6 +392,7 @@ export const DiscussionPage = () => {
             updateFilterCondition={updateFilterCondition}
             onSelectTopic={handleTopicSelect}
             onCreateTopic={onCreateTopic}
+            onPageChange={onPageChange}
           />
 
           <UserHistory

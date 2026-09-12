@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useBoundStore } from '../../../../store'
+import { useState } from 'react'
+import { useBoundStore } from '@store/index'
 import { ReactionOperateType } from '../../const'
 import './MessageItem.css'
 
@@ -15,7 +15,7 @@ export const MessageItem = ({ message, reactions, onReply, onReact, onEdit, onDe
   const [showReactionPanel, setShowReactionPanel] = useState(false)
 
   // 当前用户
-  const currentUser = useBoundStore((state) => state.user)
+  const currentUser = useBoundStore((state: any) => state.user) as any
 
   const handleReply = () => {
     if (replyContent.trim()) {
@@ -34,7 +34,7 @@ export const MessageItem = ({ message, reactions, onReply, onReact, onEdit, onDe
   const formatDate = (timestamp) => {
     const date = new Date(timestamp)
     const now = new Date()
-    const diff = now - date
+    const diff = now.getTime() - date.getTime()
 
     if (diff < 60000) {
       return '刚刚'
@@ -48,8 +48,8 @@ export const MessageItem = ({ message, reactions, onReply, onReact, onEdit, onDe
   }
 
   // 聚合reaction
-  const groupbyReactionType = (reactions) => {
-    const typeMap = {}
+  const groupbyReactionType = (reactions: any[]) => {
+    const typeMap: any = {}
     // console.log("group", reactions)
     reactions.forEach((r) => {
       if (r.type in typeMap) {
@@ -63,7 +63,7 @@ export const MessageItem = ({ message, reactions, onReply, onReact, onEdit, onDe
       }
     })
     console.log('typemap', Object.values(typeMap))
-    return Object.values(typeMap)
+    return Object.values(typeMap) as Array<{type: string; content: string; count: number; user_id: string}>
   }
 
   const isCurrentUser = message.user_id === currentUser.id

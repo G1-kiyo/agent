@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Streamdown } from 'streamdown'
 import { code } from '@streamdown/code'
 import { mermaid } from '@streamdown/mermaid'

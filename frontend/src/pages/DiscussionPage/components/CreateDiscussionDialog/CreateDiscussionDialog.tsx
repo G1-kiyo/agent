@@ -1,4 +1,3 @@
-import React from 'react'
 import { useCreateDiscussion } from '../../hooks/useCreateDiscussion'
 import './CreateDiscussionDialog.css'
 
@@ -67,7 +66,7 @@ export const CreateDiscussionDialog = ({
               placeholder="请输入讨论标题..."
               className={`form-input ${errors.title ? 'error' : ''}`}
               disabled={submitting}
-              maxLength="100"
+              maxLength={100}
             />
             {errors.title && (
               <span className="error-message">{errors.title}</span>
@@ -88,8 +87,8 @@ export const CreateDiscussionDialog = ({
               placeholder="请详细描述讨论内容、背景和目标..."
               className={`form-textarea ${errors.description ? 'error' : ''}`}
               disabled={submitting}
-              rows="4"
-              maxLength="500"
+              rows={4}
+              maxLength={500}
             />
             {errors.description && (
               <span className="error-message">{errors.description}</span>
