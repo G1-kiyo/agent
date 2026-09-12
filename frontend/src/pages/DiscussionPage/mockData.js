@@ -24,8 +24,6 @@ export const mockDiscussion = {
   lastActivity: '2024-01-15T14:20:00Z',
   engagementRate: 78, // 参与率
   averageResponseTime: '15分钟', // 平均响应时间
-  averageResponseTime: '15分钟',
-  engagementRate: 78
 }
 
 // 模拟消息数据

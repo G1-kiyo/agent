@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "npx eslint src/**/*.{js,ts,tsx}"
   },
   "dependencies": {
     "@streamdown/cjk": "^1.0.3",
@@ -23,7 +24,19 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
     "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^17.12.0",
+    "jsdom": "^26.1.0",
+    "sass": "^1.99.0",
+    "typescript": "^6.0.3",
     "vite": "^4.3.9"
   }
 }

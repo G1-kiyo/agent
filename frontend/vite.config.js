@@ -1,6 +1,8 @@
+/// <references types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { createMpaPlugin } from 'vite-plugin-virtual-mpa'
+import path from 'path'
 
 // 多页面应用（MPA）配置
 // 用 vite-plugin-virtual-mpa 让 5 个页面共用同一份 index.html 模板，
@@ -8,6 +10,17 @@ import { createMpaPlugin } from 'vite-plugin-virtual-mpa'
 // 并自动配置 rollupOptions.input 与开发服务器的 history fallback。
 // 模板内通过 EJS 占位符 <%= title %> 注入各页面标题。
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@api": path.resolve(__dirname, "./src/api"),
+      "@components": path.resolve(__dirname, "./src/components"),
+      "@consts": path.resolve(__dirname, "./src/consts"),
+      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
+      "@store": path.resolve(__dirname, "./src/store"),
+      "@utils": path.resolve(__dirname, "./src/utils"),
+    }
+  },
   plugins: [
     react(),
     ...createMpaPlugin({
@@ -48,16 +61,16 @@ export default defineConfig({
   server: {
     port: 3000,
     open: false,
-    proxy:{
-      '/api':{
-        target:"http://backend:5173",
-        changeOrigin:true
+    proxy: {
+      '/api': {
+        target: "http://backend:5173",
+        changeOrigin: true
       },
-      '/websocket':{
-        target:"ws://backend:5173",
-        ws:true,
-        changeOrigin:true
+      '/websocket': {
+        target: "ws://backend:5173",
+        ws: true,
+        changeOrigin: true
       }
     }
-  },
+  }
 })
