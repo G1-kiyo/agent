@@ -6,7 +6,8 @@
     "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "npx eslint src/**/*.{js,ts,tsx}"
+    "lint": "npx eslint src/**/*.{js,jsx,ts,tsx}",
+    "prepare": "husky"
   },
   "dependencies": {
     "@streamdown/cjk": "^1.0.3",
@@ -34,9 +35,16 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^17.12.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^15.5.2",
     "sass": "^1.99.0",
     "typescript": "^6.0.3",
     "vite": "^4.3.9"
+  },
+  "lint-staged": {
+    ".{js,jsx,ts,tsx}": [
+      "eslint"
+    ]
   }
 }
