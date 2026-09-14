@@ -1,0 +1,19 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: kafka
+spec:
+  kafka:
+    version: 3.6
+    replicas: 3  # 建议至少 3 个节点
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+    config:
+      # 关键生产配置：确保数据可靠性
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      offsets.topic.replication.factor: 3

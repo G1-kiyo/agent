@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-deployment
+spec:
+  selector:
+    matchLabels:
+      app: celery
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: celery
+    containers:
+    - name: celery-container
+      image: crpi-dnik4qqp3fmowxt1.cn-hangzhou.personal.cr.aliyuncs.com/agent_wu/agent-backend:latest
+      envFrom:
+      - configMapRef:
+          name: agent-config
+      - secretRef:
+          name: agent-secret
+      command: ["celery", "-A", "celery_app", "worker", "-l", "INFO"]

@@ -1,0 +1,19 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata: 
+  name: kafka-connector
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector
+  config:
+    database.hostname: postgres
+    database.port: 5432
+    database.user: postgres
+    database.password: ${env:POSTGRES_PASSWORD}
+    database.dbname: agent
+    topic_prefix: agent_topic
+    plugin.name: decoderbufs
+    schema.history.internal.kafka.bootstrap.servers: kafka:9092
+    schema.history.internal.kafka.topic: schemahistory.inventory

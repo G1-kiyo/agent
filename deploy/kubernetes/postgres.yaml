@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  label:
+    run: postgres
+spec:
+  ports:
+  - port: 5432
+    protocol: TCP
+  selector:
+    run: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: postgres-statefulset
+spec:
+  serviceName: "postgres"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec: 
+      containers:
+      - name: postgres-container
+        image: quay.io/debezium/postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef: 
+            name: agent-config
+        - secretRef:
+            name: agent-secret
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        command:
+        - |
+          postgres 
+          -c wal_level=logical 
+          -c max_replication_slots=10 
+          -c max_wal_senders=10 
+          -c output_plugin_libraries=pgoutput,test_decoding,decoderbufs
+        readinessProbe:
+          exec:
+            command: [ "pg_isready","-U", "$POSTGRES_USER","-d", "$POSTGRES_DB" ]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThresholds: 5
+volumeClaimTemplates:
+- metadata:
+    name: postgres-data
+  spec:
+    accessNodes: ["ReadWriteOnce"]
+    storageClassName: "alicloud-disk-ssd"
+    resources:
+      requests:
+        storage: 1Gi

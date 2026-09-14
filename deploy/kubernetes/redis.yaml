@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  label:
+    run: redis
+spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+  selector:
+    run: redis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-statefulset
+spec:
+  serviceName: "redis"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis-container
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        command:
+        - |
+          redis-server 
+          --appendonly "yes"
+          --appendfsync everysec
+          --save "900 1"
+          --save "300 10"
+        envFrom:
+        - configMapRef: 
+            name: agent-config
+        - secretRef:
+            name: agent-secret
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreholds: 5
+volumeClaimTemplates:
+- metadata:
+    name: redis-data
+  spec:
+    accessModes: ["ReadWriteOnce"]
+    storageClassName: "alicloud-disk-ssd"
+    resources:
+      requests:
+        storage: 1Gi
+

@@ -217,6 +217,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Deployment
+deploy/kubernetes/secret.yaml
+
 # frontend
 node_modules/
 .vite/

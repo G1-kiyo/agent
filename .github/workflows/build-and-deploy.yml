@@ -1,0 +1,112 @@
+name: build-and-deploy workflow
+run-name: Deploy to ${{ inputs.deploy_target }} by @${{ github.actor }}
+on:
+  push:
+    branches:
+      - main
+      - release/**
+env:
+  DOCKER_COMPOSE_FILE: docker-compose.dev.yml
+  
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: chekout code
+        uses: actions/checkout@v6
+      - name: check backend code
+        run: cd backend && ruff check
+      - name: check frontend code
+        run: cd frontend && npm run lint
+
+  build-backend:
+    name: build-backend
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - name: chekout code
+        uses: actions/checkout@v6
+      - name: login to acr
+        run: |
+          docker login \
+          --username ${{secrets.ALIYUN_REGISTRY_USERNAME}} \
+          --password-stdin <<< ${{secrets.ALIYUN_REGISTRY_PASSWORD}} \
+          ${{secrets.ALIYUN_REGISTRY_URL}}
+      - name: build 
+        run: |
+          docker compose \
+          -f $DOCKER_COMPOSE_FILE build --no-cache
+          -t ${{secrets.ALIYUN_REGISTRY_URL}}/${{secrets.ALIYUN_NAMESPACE}}/${{secrets.ALIYUN_REPO_NAME_BACKEND}}:${{github.sha}} \
+          ./backend
+      - name: push
+        run: |
+          docker push \
+          ${{secrets.ALIYUN_REGISTRY_URL}}/${{secrets.ALIYUN_NAMESPACE}}/${{secrets.ALIYUN_REPO_NAME_BACKEND}}:${{github.sha}} \
+          ./backend
+    
+  build-frontend:
+    name: build-frontend
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - name: chekout code
+        uses: actions/checkout@v6
+      - name: login to acr
+        run: |
+          docker login \
+          --username ${{secrets.ALIYUN_REGISTRY_USERNAME}} \
+          --password-stdin <<< ${{secrets.ALIYUN_REGISTRY_PASSWORD}} \
+          ${{secrets.ALIYUN_REGISTRY_URL}}
+      - name: build 
+        run: |
+          docker compose \
+          -f $DOCKER_COMPOSE_FILE build --no-cache
+          -t ${{secrets.ALIYUN_REGISTRY_URL}}/${{secrets.ALIYUN_NAMESPACE}}/${{secrets.ALIYUN_REPO_NAME_FRONTEND}}:${{github.sha}} \
+          ./frontend
+      - name: push
+        run: |
+          docker push \
+          ${{secrets.ALIYUN_REGISTRY_URL}}/${{secrets.ALIYUN_NAMESPACE}}/${{secrets.ALIYUN_REPO_NAME_FRONTEND}}:${{github.sha}} \
+          ./frontend
+
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v6
+      - name: setup k8s
+        uses: azure/setup-kubectl@v3
+      - name: configure k8s
+        run: |
+          mkdir -p "$HOME/.kube" \
+          echo ${{secrets.ALIYUN_KUBECONFIG}} | base64 -d > "$HOME/.kube/config"
+      - name: deploy config
+        run: |
+          kubectl apply -f deploy/kubernetes/configmap.yaml
+          kubectl apply -f deploy/kubernetes/sealed-secret.yaml
+      - name: deploy data storage
+        run: |
+          kubectl apply -f deploy/kubernetes/postgres.yaml
+          kubectl apply -f deploy/kubernetes/qdrant.yaml
+          kubectl apply -f deploy/kubernetes/redis.yaml
+          kubectl apply -f deploy/kubernetes/celery.yaml
+
+          kubectl apply -f deploy/kubernetes/kafka.yaml
+          kubectl apply -f deploy/kubernetes/kafka-connect.yaml
+          kubectl apply -f deploy/kubernetes/kafka-connector.yaml
+
+      - name: deploy app
+        run: |
+          sed -i "s|image: .*|image: ${{secrets.ALIYUN_REGISTRY_URL}}/${{secrets.ALIYUN_NAMESPACE}}/${{secrets.ALIYUN_REPO_NAME_BACKEND}}:${{github.sha}}|" \
+            deploy/kubernetes/backend.yaml
+          kubectl apply -f deploy/kubernetes/backend.yaml
+
+          sed -i "s|image: .*|image: ${{secrets.ALIYUN_REGISTRY_URL}}/${{secrets.ALIYUN_NAMESPACE}}/${{secrets.ALIYUN_REPO_NAME_FRONTEND}}:${{github.sha}}|" \
+            deploy/kubernetes/frontend.yaml
+          kubectl apply -f deploy/kubernetes/frontend.yaml
+
+

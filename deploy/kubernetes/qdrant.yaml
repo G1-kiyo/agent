@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant-service
+  label:
+    run: qdrant
+spec:
+  ports:
+  - port: 6333
+    protocol: TCP
+  - port: 6334
+    protocol: TCP
+  selector:
+    run: qdrant
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: qdrant-statefulset
+spec:
+  serviceName: "qdrant"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    conatiner:
+    - name: qdrant-container
+      image: qdrant/qdrant:v1.18.0
+      ports:
+      - containerPort: 6333
+      - containerPort: 6334
+      volumeMounts:
+      - name: qdrant-data
+        mountPath: /qdrant/storage
+      envFrom:
+        - configMapRef: 
+            name: agent-config
+        - secretRef:
+            name: agent-secret
+volumeClaimTemplates:
+- metadata:
+    name: qdrant-data
+  spec:
+    accessNodes: ["ReadWriteOnce"]
+    storageClassName: "alicloud-disk-ssd"
+    resources:
+      requests:
+        storage: 1Gi
+    
+      

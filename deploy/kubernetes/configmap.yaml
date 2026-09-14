@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+data:
+  # postgres 数据库配置
+  POSTGRES_USER: postgres
+  POSTGRES_DB: agent
+  POSTGRES_HOST: db:5432
+  POSTGRES_WAL_LEVEL: logical
+
+  # 环境配置
+  ENVIRONMENT: development
+
+  # Qdrant配置
+  QDRANT_HOST: qdrant
+  QDRANT_PORT: 6333
+
+  # Redis配置
+  REDIS_HOST: redis
+  REDIS_USER: redis
+  REDIS_PORT: 6379
+  REDIS_DB: 2
+
+  # Celery配置
+  # 消息代理 用于接收消息并取出任务
+  CELERY_BROKER_URL: redis://redis:6379/0
+  # 结果后端 用于存储任务结果 都用的redis 区分两个不同的数据库
+  CELERY_RESULT_BACKEND: redis://redis:6379/1
+
+  # celery新建redis连接池 对应db
+  CELERY_NEW_CONNECTION_POOL_DB: 2 
+
+  # oss配置
+  OSS_REGION: cn-hongkong
+  OSS_BUCKET: agent-wudongnan
+  OSS_ENDPOINT: oss-cn-hongkong.aliyuncs.com
+
+  # kafka配置
+  CLUSTER_ID: 87574789018877952
+  NODE_ID: 1
+  # broker和controller角色
+  NODE_ROLE: combined
+  # controller集合，内部用
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+  # 告诉kafka自己节点的门牌号，不同角色不同门牌号
+  KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+  # 给客户端（外部连接用）
+  KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+  BOOTSTRAP_SERVERS: kafka:9092
+  CONFIG_STORAGE_TOPIC: agent_connect_config
+  OFFSET_STORAGE_TOPIC: agent_connect_offset
+  STATUS_STORAGE_TOPIC: agent_connect_status

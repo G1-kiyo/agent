@@ -1,0 +1,37 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: kafka-connect
+  namespace: kafka
+  annotations:
+    strimzi.io/use-connector-esources: "true"
+spec:
+  replicas: 3
+  bootstrapServers: kafka:9092
+  externalConfiguration:
+    env: 
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: agent-secret
+            key: POSTGRES_PASSWORD
+  build:
+    output:
+      type: docker
+      image: crpi-dnik4qqp3fmowxt1.cn-hangzhou.personal.cr.aliyuncs.com/agent_wu/agent-kafka-connect:latest
+      pushSecret: registry-credential
+    plugins:
+      - name: debezium-postgres-connector
+        artifacts: 
+          - type: zip
+            url: https://repo1.maven.org/maven2/io/debezium/debezium-connector-postgres/3.6.2.Final/debezium-connector-postgres-3.6.2.Final-plugin.zip
+            sha512sum: 805f8afa70a26f409f9a1b7ffb8fe423fd328ee79dcee6044b99e069d3db488a0a29df2974bb76580e84e97884caeef72ab5c31387f13e986321dda761417bc5
+  groupId: discussion_group_consumer
+  configStorageTopic: agent_connect_config
+  offsetStorageTopic: agent_connect_offset
+  statusStorageTopic: agent_connect_status
+  config:
+    key.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    key.converter.schemas.enable: true
+    value.converter.schemas.enable: true

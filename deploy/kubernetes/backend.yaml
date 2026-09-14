@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  label:
+    run: backend
+spec:
+  ports: 
+  - port: 5173
+    protocol: TCP
+  selector:
+    run: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  replicas: 3
+  template: 
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend-container
+        image: crpi-dnik4qqp3fmowxt1.cn-hangzhou.personal.cr.aliyuncs.com/agent_wu/agent-backend:latest
+        ports: 
+        - containerPort: 5173
+        envFrom:
+        - configMapRef: 
+            name: agent-config
+        - secretRef:
+            name: agent-secret
+        command: ["fastapi","dev", "main.py", "--host", "0.0.0.0", "--port", "5173"]
+        readinessProbe:
+          exec:
+            command: [ "curl", "-f", "http://localhost:5173/health" ]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 5
+      
