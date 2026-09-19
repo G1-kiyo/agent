@@ -5,15 +5,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useDiscussionState, useMessages, useVoting, useForkDiscussion, useUserHistory } from './hooks'
 import { DiscussionHeader, MessageList, MessageInput, HistoricalTopics, UserHistory, ForkDialog, AIDebateGenerator } from './components'
-import { mockTopics } from './components/HistoricalTopics/mockData'
 import './DiscussionPage.css'
-import { mockDiscussion, mockMessages, mockVotes, mockForkHistory, mockLoadingStates, mockErrors } from './mockData'
-import { discussionApi } from '../../api/discussion'
-import BatchMsgScheduler from '../../utils/batchmsgscheduler'
-import WebsocketService from '../../utils/websocketservice'
-import NodeOperator from '../../utils/nodeoperator'
-import { useBoundStore } from '../../store'
-import { GlobalAlert } from '../../components'
+import { discussionApi } from '@api/index'
+import BatchMsgScheduler from '@utils/batchmsgscheduler'
+import WebsocketService from '@utils/websocketservice'
+import NodeOperator from '@utils/nodeoperator'
+import { useBoundStore } from '@store/index'
+import { GlobalAlert } from '@components/index'
 import { ReactionOperateType, ForkType } from './const'
 
 // 查询参数
@@ -22,11 +20,10 @@ export const DiscussionPage = () => {
   // 使用讨论状态钩子
   const { discussion, error, loading, getDiscussionById, historicalTopics, topicListStats, filterCondition, updateFilterCondition, resetFilterCondition, onCreateTopic, getHistoricalTopics, onPageChange } = useDiscussionState()
   const { messages, lastMessageId, setMessages, loading: messagesLoading, sendMessage, replyToMessage, reactToMessage, scrollToTargetIndex, initMessages } = useMessages()
-  const { userVotes, toggleVote, isVoting, initUserVotes } = useVoting()
-  const { forkDiscussion, isForking, forkHistory, initForkHistory } = useForkDiscussion()
-  const { userHistory, initUserHistory } = useUserHistory()
+  const { userVotes, toggleVote, isVoting, initUserVotes } = useVoting(discussionId)
+  const { forkDiscussion, isForking,} = useForkDiscussion()
   const [reactions, setReactions] = useState([])
-  const user = useBoundStore((state) => state.user)
+  const user = useBoundStore((state: any) => state.user) as any
   
 
 
@@ -183,7 +180,7 @@ export const DiscussionPage = () => {
       }
     }
     const delFn = (currentNode, newVal) => {
-      const reactions = currentNode?.reactions
+      let reactions = currentNode?.reactions
       if (reactions?.length > 0) {
         const targetReaction = reactions.find((r) => r.reaction_id === newVal.reaction_id)
         if (targetReaction) {
@@ -339,8 +336,8 @@ export const DiscussionPage = () => {
                   reactions={reactions}
                   onReply={(messageId, content) => { console.log("reply", discussion?.discussion_id, messageId); replyToMessage(discussion?.discussion_id, messageId, content) }}
                   onReact={(messageId, reactionType, content, operateType) => reactToMessage(discussion?.discussion_id, messageId, reactionType, content, operateType)}
-                  onEdit={(messageId) => {
-                    editMessage(messageId)
+                  onEdit={(messageId, newContent) => {
+                    editMessage(messageId, newContent)
                   }}
                   onDelete={(messageId) => {
                     deleteMessage(messageId)
@@ -350,6 +347,7 @@ export const DiscussionPage = () => {
 
                 <MessageInput
                   onSubmit={(content) => sendMessage(discussion?.discussion_id, content)}
+                  onCancel={() => {}}
                   placeholder="发表你的观点..."
                   userAvatar="https://api.dicebear.com/7.x/avataaars/svg?seed=currentuser"
                   userName="当前用户"
@@ -368,7 +366,7 @@ export const DiscussionPage = () => {
           {error && (
             <div className="error-container">
               <p>{error}</p>
-              <button onClick={() => getDiscussionById()}>重新加载</button>
+              <button onClick={() => getDiscussionById(discussionId)}>重新加载</button>
             </div>
           )}
 
@@ -404,10 +402,11 @@ export const DiscussionPage = () => {
 
       {showForkDialog && (
         <ForkDialog
+          isOpen={showForkDialog}
           discussion={discussion}
-          onSubmit={handleForkSubmit}
+          onFork={handleForkSubmit}
           onClose={() => setShowForkDialog(false)}
-          isSubmitting={isForking}
+          isForking={isForking}
         />
       )}
     </div>

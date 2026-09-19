@@ -14,8 +14,9 @@ from api.schemas.discussion import (
     ReplyMessageRequest,
     ReactMessageRequest,
     ForkRequest,
-    ForkType
+    ForkType,
 )
+from api.schemas.user import User as UserModel
 from sqlalchemy.exc import IntegrityError
 from infrastructure.database.models.discussion import (
     Discussion,
@@ -27,15 +28,15 @@ from infrastructure.database.models.user import User
 from utils.snowflake_generate import snowflake_generate
 from utils.datetime import totimestamp, gendatetime, checkisinrange
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select, func, desc, text, case, delete
+from sqlalchemy import select, func, desc, case, delete
 from fastapi import WebSocket, status
 import json
 import asyncio
-from langchain_core.messages import HumanMessage,SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from agents.ai_debater.graph import compile_graph
 from capabilities.llm.factory import get_agent
 from agents.text_extractor.state import DiscussionSchema
-from agents.text_extractor.prompts import SYSTEM_PROMPT,DISCUSSION_SYSTEM_PROMPT
+from agents.text_extractor.prompts import DISCUSSION_SYSTEM_PROMPT
 
 
 @logger_handler("discussion")
@@ -56,12 +57,12 @@ async def create_new_discussion(
         await db.commit()
         await db.refresh(discussion)
         return {
-            "id":str(discussion.id),
-            "title":discussion.title,
-            "category":discussion.category,
-            "desc":discussion.desc,
-            "create_at":totimestamp(discussion.create_at),
-            "user_id":str(discussion.user_id)
+            "id": str(discussion.id),
+            "title": discussion.title,
+            "category": discussion.category,
+            "desc": discussion.desc,
+            "create_at": totimestamp(discussion.create_at),
+            "user_id": str(discussion.user_id),
         }
     except IntegrityError as e:
         origin_error = e.orig
@@ -148,10 +149,12 @@ async def get_discussion_list(
         .scalar_subquery()
     )
     common_stmt = func.greatest(
-        func.coalesce(discussion_create_stmt, datetime(1970, 1, 1)),
-        func.coalesce(message_create_stmt, datetime(1970, 1, 1)),
-        func.coalesce(reply_create_stmt, datetime(1970, 1, 1)),
-        func.coalesce(reaction_create_stmt, datetime(1970, 1, 1)),
+        func.coalesce(
+            discussion_create_stmt, datetime(1970, 1, 1, tzinfo=timezone.utc)
+        ),
+        func.coalesce(message_create_stmt, datetime(1970, 1, 1, tzinfo=timezone.utc)),
+        func.coalesce(reply_create_stmt, datetime(1970, 1, 1, tzinfo=timezone.utc)),
+        func.coalesce(reaction_create_stmt, datetime(1970, 1, 1, tzinfo=timezone.utc)),
     ).label("last_activity")
     # common_stmt = text("""
     #         GREATEST(
@@ -360,9 +363,10 @@ async def get_discussion_basicinfo(discussion_id: int, db: SessionDep):
     }
     return discussion
 
+
 @logger_handler("discussion")
 async def generate_ai_debate(discussion_id: int, db: SessionDep):
-    discussion_basicinfo = await get_discussion_basicinfo(discussion_id,db)
+    discussion_basicinfo = await get_discussion_basicinfo(discussion_id, db)
     if discussion_basicinfo:
         category = discussion_basicinfo["category"]
         discussion_str = f"""
@@ -371,51 +375,70 @@ async def generate_ai_debate(discussion_id: int, db: SessionDep):
             话题分类：{Category.to_chinesename(category)}\n
             话题描述：{discussion_basicinfo["desc"]}
         """
-        result = await compile_graph.ainvoke(input={
-            "messages":[HumanMessage(content=discussion_str)],
-            "classifications":[],
-            "opinions":[],
-            "summary":""
-        })
+        result = await compile_graph.ainvoke(
+            input={
+                "messages": [HumanMessage(content=discussion_str)],
+                "classifications": [],
+                "opinions": [],
+                "summary": "",
+            }
+        )
         return {
-            "opinions":result.get("opinions",[]),
-            "summary":result.get("summary","")
+            "opinions": result.get("opinions", []),
+            "summary": result.get("summary", ""),
         }
     return None
 
+
 @logger_handler("discussion")
-async def fork_new_discussion(fork_request:ForkRequest, ua:UserAuth, db: SessionDep):
+async def fork_new_discussion(fork_request: ForkRequest, ua: UserAuth, db: SessionDep):
     discussion_id = fork_request.discussion_id
     content = fork_request.content
-    llm = get_agent("text_extractor",{"force_schema":True,"output_schema":DiscussionSchema})
+    llm = get_agent(
+        "text_extractor", {"force_schema": True, "output_schema": DiscussionSchema}
+    )
     llm_result = None
     created_discussion = {}
-    if fork_request.type==ForkType.DISCUSSION:
+    if fork_request.type == ForkType.DISCUSSION:
         if discussion_id is None:
             return False
-        discussion_basicinfo = await get_discussion_basicinfo(discussion_id,db)
+        discussion_basicinfo = await get_discussion_basicinfo(discussion_id, db)
         basicinfo_str = f"""
             话题原始背景信息：标题为{discussion_basicinfo["title"]},属于{discussion_basicinfo["category"]}类，
             主题是 {discussion_basicinfo["desc"]}\n
             现在要在该话题上进行分叉讨论，新的讨论信息是：{content}
         """
-        llm_result = await llm.ainvoke([HumanMessage(content=basicinfo_str),SystemMessage(content=DISCUSSION_SYSTEM_PROMPT)])
-        
+        llm_result = await llm.ainvoke(
+            [
+                HumanMessage(content=basicinfo_str),
+                SystemMessage(content=DISCUSSION_SYSTEM_PROMPT),
+            ]
+        )
+
     else:
         basicinfo_str = f"""
             现在需要根据下述内容进行话题分叉：{content}
         """
-        llm_result = await llm.ainvoke([HumanMessage(content=basicinfo_str),SystemMessage(content=DISCUSSION_SYSTEM_PROMPT)])
+        llm_result = await llm.ainvoke(
+            [
+                HumanMessage(content=basicinfo_str),
+                SystemMessage(content=DISCUSSION_SYSTEM_PROMPT),
+            ]
+        )
     if llm_result.is_valid:
-        created_discussion = await create_new_discussion(DiscussionCreate.model_validate({
-            "title":llm_result.title,
-            "category":Category.to_code(llm_result.category.value),
-            "desc":llm_result.desc
-        }),ua,db) 
+        created_discussion = await create_new_discussion(
+            DiscussionCreate.model_validate(
+                {
+                    "title": llm_result.title,
+                    "category": Category.to_code(llm_result.category.value),
+                    "desc": llm_result.desc,
+                }
+            ),
+            ua,
+            db,
+        )
         return created_discussion
     return False
-    
-
 
 
 @logger_handler("discussion")
@@ -546,7 +569,6 @@ async def react_message(
 ):
     operate_type = react_message_request.operate_type
     if operate_type == OperateType.CONFIRM:
-
         react_id = await snowflake_generate.generate()
         reaction = Reaction(
             id=react_id,
@@ -584,13 +606,12 @@ async def notify_discussion(
             batch_results = await kas.getmany(timeout_ms=10 * 1000)
             batch = []
             print(f"notify batch:{batch_results}")
-            for tp, messages in batch_results.items():
+            for messages in batch_results.values():
                 for message in messages:
                     value = getattr(message, "value", None)
                     payload = value.get("payload", None) if value else None
 
                     if payload:
-
                         db = payload.get("source", {}).get("db")
                         table = payload.get("source", {}).get("table")
                         op = payload.get("op", "")
@@ -615,14 +636,20 @@ async def notify_discussion(
                                         "username": user.get("username", ""),
                                     }
                                 else:
-                                    user_stmt = select(User.username).where(
-                                        User.id == user_id
-                                    )
-                                    username = await db.scalar(user_stmt)
-                                    modify_data = {
-                                        **common_data,
-                                        "username": username,
-                                    }
+                                    user_stmt = select(User).where(User.id == user_id)
+                                    user = await db.scalar(user_stmt)
+                                    if user.username:
+                                        modify_data = {
+                                            **common_data,
+                                            "username": user.username,
+                                        }
+                                        await rd.hset(
+                                            f"user:basicinfo:{user_id}",
+                                            mapping=UserModel.model_validate(
+                                                user
+                                            ).model_dump(),
+                                        )
+
                                 modify_data[f"{table}_id"] = str(
                                     origin_data.get("id", "")
                                 )
@@ -652,9 +679,9 @@ async def notify_discussion(
 
             if batch:
                 await websocket.send_text(json.dumps(batch, ensure_ascii=False))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - 兜底逻辑
         ExceptionLogger.error(
-            msg=f"webspcket connection error-{str(e)}",
+            msg=f"webspcket connection error-{e!s}",
             extra={"request_url": websocket.url},
         )
         error_code = status.WS_1011_INTERNAL_ERROR

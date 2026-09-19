@@ -60,6 +60,9 @@ export const AuthModal = ({ isOpen, onClose, auth }) => {
           setFormError(result.error)
         }
       }
+      setTimeout(()=>{
+        window.location.reload()
+      })
     } catch (error) {
       setFormError(error.message)
     }

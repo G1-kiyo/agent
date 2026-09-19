@@ -78,7 +78,7 @@ export const AIDebateGenerator = ({
   useEffect(() => {
     console.log("generate", showGenerator, generatedDebate, isGenerating)
     if (showGenerator && !isGenerating && topicId && !hasError && !generatedDebate) {
-      // handleGenerate()
+      handleGenerate()
     }
   }, [showGenerator, generatedDebate, isGenerating, topicId])
 

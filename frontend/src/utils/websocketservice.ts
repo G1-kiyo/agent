@@ -14,9 +14,17 @@ class WebsocketService {
     retryCount = 0
     maxRetry = 5
     basicDelay = 1000
+    // 重试定时器
     retryTimer = null
+    // 验证token定时器
     validateTimer = null
-    timer = null
+
+    heartbeatTimer = null
+    heartbeatDelay = 60 * 1000
+    serverResponseDetectTimer = null
+    serverResponseDelay = 1000
+    lastPongTime = 0
+
 
     static getInstance() {
         if (!WebsocketService.instance) {
@@ -27,9 +35,9 @@ class WebsocketService {
 
     initializeWebsocket() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            if (this.timer) {
-                clearTimeout(this.timer)
-                this.timer = null
+            if (this.retryTimer) {
+                clearTimeout(this.retryTimer)
+                this.retryTimer = null
             }
             this.retryCount = 0
             return;
@@ -65,6 +73,9 @@ class WebsocketService {
                 const payload = data?.payload || {}
                 if (event === "validatetoken") {
                     this.refreshWebsocketToken(payload)
+                } else if (event === "heartbeat") {
+                    this.lastPongTime = Date.now()
+                    this.startHeartbeatDetect()
                 } else {
                     this.emit(event, payload)
                 }
@@ -108,9 +119,9 @@ class WebsocketService {
     }
     retryConnect() {
         if (this.retryCount >= this.maxRetry) return
-        if (this.timer) {
-            clearTimeout(this.timer)
-            this.timer = null
+        if (this.retryTimer) {
+            clearTimeout(this.retryTimer)
+            this.retryTimer = null
         }
         const delay = this.basicDelay * Math.pow(2, this.retryCount)
         this.retryCount++
@@ -120,7 +131,7 @@ class WebsocketService {
         }, delay)
     }
     refreshWebsocketToken(payload) {
-        if(this.validateTimer){
+        if (this.validateTimer) {
             clearTimeout(this.validateTimer)
             this.validateTimer = null
         }
@@ -130,6 +141,27 @@ class WebsocketService {
             const msg = { "event": "validatetoken", "payload": { "token": newToken } }
             this.send(JSON.stringify(msg))
         }, delay)
+    }
+    startHeartbeatDetect() {
+        if (this.heartbeatTimer) {
+            clearTimeout(this.heartbeatTimer)
+            this.heartbeatTimer = null
+        }
+
+        this.heartbeatTimer = setTimeout(() => {
+            this.send(JSON.stringify({ "event": "heartbeat" }))
+
+            if (this.serverResponseDetectTimer) {
+                clearTimeout(this.serverResponseDetectTimer)
+                this.serverResponseDetectTimer = null
+            }
+            this.serverResponseDetectTimer = setTimeout(() => {
+                if (Date.now() - this.lastPongTime > this.heartbeatDelay + this.serverResponseDelay) {
+                    this.ws.close()
+                }
+            }, this.serverResponseDelay)
+        }, this.heartbeatDelay)
+
     }
 
 }

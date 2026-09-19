@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
-import React, { useState, useEffect } from 'react'
-import { useBoundStore } from '@/store/index'
+import { useEffect } from 'react'
+import { useBoundStore } from '@store/index'
 import './GlobalAlert.css'
 /**
  * Alert 类型常量

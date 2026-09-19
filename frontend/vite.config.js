@@ -31,27 +31,27 @@ export default defineConfig({
         {
           name: 'home',
           filename: 'index.html',
-          entry: '/src/entries/home.jsx',
+          entry: '/src/entries/home.tsx',
           data: { title: '首页' },
         },
         {
           name: 'search',
-          entry: '/src/entries/search.jsx',
+          entry: '/src/entries/search.tsx',
           data: { title: '智能检索' },
         },
         {
           name: 'discussion',
-          entry: '/src/entries/discussion.jsx',
+          entry: '/src/entries/discussion.tsx',
           data: { title: '协同讨论' },
         },
         {
           name: 'knowledge',
-          entry: '/src/entries/knowledge.jsx',
+          entry: '/src/entries/knowledge.tsx',
           data: { title: '知识库' },
         },
         {
           name: 'admin',
-          entry: '/src/entries/admin.jsx',
+          entry: '/src/entries/admin.tsx',
           data: { title: '管理后台' },
         },
       ],

@@ -7,7 +7,7 @@ from api.deps import (
     SessionDep,
     WebsocketUserAuth,
     WebSocketConnManagerDep,
-    websocket_authentication
+    websocket_authentication,
 )
 import json
 from infrastructure.logging.logger import DiscussionLogger
@@ -32,12 +32,15 @@ async def discussion_websocket_endpoint(
             client_msg = await websocket.receive_text()
             j_client_msg = json.loads(client_msg)
             # 持续地验证token
-            if j_client_msg.get("event",None) and j_client_msg.get("event") == "validatetoken":
-                token = j_client_msg.get("payload",None).get("token")
-                await websocket_authentication(token,websocket,db,wcm)
-    except WebSocketDisconnect as disconnect:
+            if j_client_msg.get("event", None):
+                if j_client_msg.get("event") == "validatetoken":
+                    token = j_client_msg.get("payload", None).get("token")
+                    await websocket_authentication(token, websocket, db, wcm)
+                if j_client_msg.get("event") == "heartbeat":
+                    await websocket.send_text(json.dumps({"event": "heartbeat"}))
+    except WebSocketDisconnect:
         DiscussionLogger.info("websocket connection closed")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - 兜底逻辑
         DiscussionLogger.error("outer discussion websocket error")
         wcm.disconnect(ua.id)
         raise WebSocketException(
@@ -46,4 +49,3 @@ async def discussion_websocket_endpoint(
         )
     finally:
         notify_task.cancel()
-    

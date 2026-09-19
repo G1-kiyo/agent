@@ -804,6 +804,20 @@ select content where id scalar
 在searchpage里面修改handleCreateFork（删掉里面的createfork）
 调用接口，成功之后就跳转到discussion的页面 window.location.href discussion.html
 
+
+待实现13
+增加心跳检测，避免突然断网等导致连接失败
+在前端onopen的时候就可以创建定时器（timeout）
+前端定时发送心跳检测数据给后端，event heartbeat  不需要content
+然后在这个定时器里面再创建定时来检测后端是否有返回（就是比较当前时间和上一次响应时间的间隔是否超过阈值）
+如果发现时间间隔已经超过指定间隔（超时了）主动触发close事件（尝试重试）
+（注意在正式创建新的定时器之前要及时清理旧的定时器）
+
+后端监听到对应事件 也发送event heartbeat
+前端也监听这个事件，拿到返回值，就设置最新的响应时间 并重新心跳检测
+
+ 
+
 待实现13
 创建github actions 从分支提交触发工作流到构建镜像再到部署
 在项目根目录创建.github/workflows/agent-build-deployment.yml

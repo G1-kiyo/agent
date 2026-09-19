@@ -20,20 +20,21 @@ def agent_node(state: AgentState, runtime: Runtime):
     # 判断是否达到迭代限制
     if current_count >= ITERATION_LIMIT:
         sys_message = "已达到迭代最大上限，禁止调用检索工具。现在，请总结上下文，将拿到的所有结果按照正确的顺序和Markdown格式返回，必须提供完整的文章或图片链接。"
-        # final_message = llm.invoke(
-        #     current_messages + [SystemMessage(content=sys_message)]
-        # )
-        ai_message = AIMessage(content='\n根据搜索结果，我为您整理了近期科技公司发布的重要产品信息：\n\n## 主要科技公司产品发布动态\n\n### OpenAI相关\n- **GPT-4.5 Turbo**：据OpenAI官方博客泄露信息，这款产品有望在2024年夏天发布\n- **ChatGPT**：开始拥有电脑历史功能\n\n### Meta相关\n- **Project Glasswing**：新产品项目\n- **Meta Muse Spark**：新产品\n- **Meta Muse**：相关产品发布\n\n### Google相关\n- **Gemini CLI v0.37.0**：Google Gemini工具链的更新版本\n\n### 其他重要信息\n- **iPhone**：全线产品涨价100美元\n- **长鑫科技**：市值超过腾讯，显示科技公司市值变化\n\n### AI工具更新\n- **Cursor**：有官方博客更新，可能涉及新功能发布\n\n需要注意的是，这些信息来自不同的新闻源和博客，部分产品发布时间可能存在差异。建议您关注各公司官方博客和权威科技媒体获取最新、最准确的产品发布信息。\n\n您对哪个特定公司的产品发布更感兴趣？我可以为您搜索更详细的信息。')
+        final_message = llm.invoke(
+            current_messages + [SystemMessage(content=sys_message)]
+        )
+        # ai_message = AIMessage(content='\n根据搜索结果，我为您整理了近期科技公司发布的重要产品信息：\n\n## 主要科技公司产品发布动态\n\n### OpenAI相关\n- **GPT-4.5 Turbo**：据OpenAI官方博客泄露信息，这款产品有望在2024年夏天发布\n- **ChatGPT**：开始拥有电脑历史功能\n\n### Meta相关\n- **Project Glasswing**：新产品项目\n- **Meta Muse Spark**：新产品\n- **Meta Muse**：相关产品发布\n\n### Google相关\n- **Gemini CLI v0.37.0**：Google Gemini工具链的更新版本\n\n### 其他重要信息\n- **iPhone**：全线产品涨价100美元\n- **长鑫科技**：市值超过腾讯，显示科技公司市值变化\n\n### AI工具更新\n- **Cursor**：有官方博客更新，可能涉及新功能发布\n\n需要注意的是，这些信息来自不同的新闻源和博客，部分产品发布时间可能存在差异。建议您关注各公司官方博客和权威科技媒体获取最新、最准确的产品发布信息。\n\n您对哪个特定公司的产品发布更感兴趣？我可以为您搜索更详细的信息。')
         return {
-            "messages": [ai_message],
+            "messages": [final_message],
             "iteration_count": current_count,
-        } 
-    # llm_invoke = llm.invoke([SystemMessage(content=SYSTEM_PROMPT)] + current_messages)
-    ai_message = AIMessage(content='\n根据搜索结果，我为您整理了近期科技公司发布的重要产品信息：\n\n## 主要科技公司产品发布动态\n\n### OpenAI相关\n- **GPT-4.5 Turbo**：据OpenAI官方博客泄露信息，这款产品有望在2024年夏天发布\n- **ChatGPT**：开始拥有电脑历史功能\n\n### Meta相关\n- **Project Glasswing**：新产品项目\n- **Meta Muse Spark**：新产品\n- **Meta Muse**：相关产品发布\n\n### Google相关\n- **Gemini CLI v0.37.0**：Google Gemini工具链的更新版本\n\n### 其他重要信息\n- **iPhone**：全线产品涨价100美元\n- **长鑫科技**：市值超过腾讯，显示科技公司市值变化\n\n### AI工具更新\n- **Cursor**：有官方博客更新，可能涉及新功能发布\n\n需要注意的是，这些信息来自不同的新闻源和博客，部分产品发布时间可能存在差异。建议您关注各公司官方博客和权威科技媒体获取最新、最准确的产品发布信息。\n\n您对哪个特定公司的产品发布更感兴趣？我可以为您搜索更详细的信息。')
-    return {"messages": [ai_message], "iteration_count": current_count + 1}
+        }
+    llm_invoke = llm.invoke([SystemMessage(content=SYSTEM_PROMPT)] + current_messages)
+    # ai_message = AIMessage(content='\n根据搜索结果，我为您整理了近期科技公司发布的重要产品信息：\n\n## 主要科技公司产品发布动态\n\n### OpenAI相关\n- **GPT-4.5 Turbo**：据OpenAI官方博客泄露信息，这款产品有望在2024年夏天发布\n- **ChatGPT**：开始拥有电脑历史功能\n\n### Meta相关\n- **Project Glasswing**：新产品项目\n- **Meta Muse Spark**：新产品\n- **Meta Muse**：相关产品发布\n\n### Google相关\n- **Gemini CLI v0.37.0**：Google Gemini工具链的更新版本\n\n### 其他重要信息\n- **iPhone**：全线产品涨价100美元\n- **长鑫科技**：市值超过腾讯，显示科技公司市值变化\n\n### AI工具更新\n- **Cursor**：有官方博客更新，可能涉及新功能发布\n\n需要注意的是，这些信息来自不同的新闻源和博客，部分产品发布时间可能存在差异。建议您关注各公司官方博客和权威科技媒体获取最新、最准确的产品发布信息。\n\n您对哪个特定公司的产品发布更感兴趣？我可以为您搜索更详细的信息。')
+    return {"messages": [llm_invoke], "iteration_count": current_count + 1}
 
 
 tool_node = ToolNode(tools=tools)
+
 
 @logger_handler("search")
 def should_continue(state: AgentState):
@@ -50,8 +51,9 @@ def should_continue(state: AgentState):
 
     return END
 
+
 @logger_handler("search")
-def generate_compile_graph(saver:AsyncPostgresSaver):
+def generate_compile_graph(saver: AsyncPostgresSaver):
     # 初始这个agent_builder
     agent_builder = StateGraph(AgentState)
 
@@ -61,7 +63,7 @@ def generate_compile_graph(saver:AsyncPostgresSaver):
 
     # 添加path
     # 入口entry
-    agent_builder.set_entry_point("agent_node") 
+    agent_builder.set_entry_point("agent_node")
 
     # 开始自主决策
     # 从agent_node开始
