@@ -18,7 +18,8 @@ RUN pip install torch==2.2.2 torchvision==0.17.2 \
 
 RUN pip install --no-cache-dir -r requirements/base.txt && \
     pip uninstall -y opencv-python 2>/dev/null || true && \
-    pip install --no-cache-dir opencv-python-headless==4.11.0.86
+    pip install --force-reinstall --no-cache-dir opencv-python-headless==4.11.0.86 && \
+    pip install --force-reinstall --no-cache-dir numpy==1.26.4
 
 
 # 再复制实际代码

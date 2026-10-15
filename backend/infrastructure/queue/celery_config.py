@@ -1,5 +1,5 @@
 from settings import settings
-
+from qdrant_client.http.exceptions import UnexpectedResponse
 
 # broker url和result backend 配置
 broker_url = settings.CELERY_BROKER_URL
@@ -15,10 +15,19 @@ result_serializer = "json"
 accept_content = ["json"]
 
 # 时区
-timezone = "Asia/Shanghai" 
+timezone = "Asia/Shanghai"
 enable_utc = True
 
 # 结果过期时间
-result_expires = 24*3600  # 1 hour
+result_expires = 24 * 3600  # 1 hour
 
-
+# 设置任务重试配置
+task_annotations = {
+    "*": {
+        "autoretry_for": (UnexpectedResponse,),
+        "max_retries": 3,
+        "retry_backoff": True,
+        "retry_backoff_max": 60,
+        "retry_jitter": True,
+    }
+}

@@ -9,7 +9,7 @@ export const KnowledgePage = () => {
   // - useRagConversation：问答对话与流式回答
   // - useKnowledgeDocuments：文档列表与筛选
   // - useDocumentUpload：上传 Modal、进度、AI 提取（上传结果通过 onUploaded 回交列表）
-  const { documentInfo, topics, stats, selectedTopic, fetchDataCallback, deleteDocument, filterByTopic } =
+  const { documentInfo, topics, stats, selectedTopic, fetchDataCallback, initKnowledgeInfo, deleteDocument, filterByTopic } =
     useKnowledgeDocuments()
   const {
     isUploaderOpen,
@@ -18,7 +18,7 @@ export const KnowledgePage = () => {
     isUploading,
     extractDocumentMeta,
     uploadDocuments,
-  } = useDocumentUpload({ onUploaded: (pageNum) => { setTimeout(() => { fetchDataCallback(pageNum) }, 3000) } })
+  } = useDocumentUpload({ onUploaded: () => { setTimeout(() => { fetchDataCallback(1);initKnowledgeInfo() }, 3000) } })
   const { query, setQuery, conversations, streamingAnswer, isQuerying, executeRagQuery } =
     useRagConversation()
 

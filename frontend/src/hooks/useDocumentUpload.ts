@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { knowledgeApi } from '@api/index'
+import { GlobalAlert } from '@components/index'
 
 // 文档上传 hook（知识库页面专属）
 // 单一职责：管理上传 Modal 状态、进度轮询、AI 元信息提取与批量提交
 // 与文档列表解耦：上传成功后通过 onUploaded 回调把新文档交还列表 hook 管理
-export const useDocumentUpload = ({ onUploaded }: { onUploaded?: (docs: any[]) => void } = {}) => {
+export const useDocumentUpload = ({ onUploaded }: { onUploaded?: () => void } = {}) => {
   // 上传 Modal 开关
   const [isUploaderOpen, setIsUploaderOpen] = useState(false)
   // 上传进度（后端 /progress 轮询返回）
@@ -16,7 +17,13 @@ export const useDocumentUpload = ({ onUploaded }: { onUploaded?: (docs: any[]) =
   const [isUploading, setIsUploading] = useState(false)
   // AI 提取中（hook 级标记，DocumentUploader 内部另有逐项状态）
   const [isExtracting, setIsExtracting] = useState(false)
+  const progressRef = useRef(null)
 
+  useEffect(() => {
+    if (uploadProgress.progress !== undefined || uploadProgress.progress !== null) {
+      progressRef.current = uploadProgress.progress
+    }
+  }, [uploadProgress])
   // AI 提取文档元信息（mock）
   // TXT/MD：FileReader 读取真实内容 → 首行作标题、首段作摘要、关键词命中话题库
   // PDF：前端无法解析，返回 mockExtractResult.pdf 模板
@@ -24,45 +31,68 @@ export const useDocumentUpload = ({ onUploaded }: { onUploaded?: (docs: any[]) =
     setIsExtracting(true)
     // mock：模拟 AI 解析延迟
     // 构造formdata，添加file，调用后端接口,拿到提取的json内容，赋值
-    /*
+
     const formData = new FormData()
     formData.append("file", file)
     const extracted_text = await knowledgeApi.ai_extract_text(formData)
     setIsExtracting(false)
     return extracted_text
-    */
-     
+
+
     // 使用mock数据替代真实API调用
-    setIsExtracting(true)
-    await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟AI解析延迟
-    
-    // 返回mock数据
-    const mockData = {
-      title: "Vite + Docker 开发环境配置问题总结",
-      summary: "本文总结了 Vite 在 Docker 开发环境中的配置问题，分析了端口监听错误和入口文件缺失的原因，并提供了详细的配置修复方案与调试步骤。",
-      tags: ["Vite", "Docker", "开发环境", "前端配置", "容器化"],
-      content_type: file.type || "text/plain",
-      file_size: file.size,
-      file_name: file.name
-    }
-    
-    setIsExtracting(false)
-    return mockData
+    // setIsExtracting(true)
+    // await new Promise(resolve => setTimeout(resolve, 1000)) // 模拟AI解析延迟
+
+    // // 返回mock数据
+    // const mockData = {
+    //   title: "Vite + Docker 开发环境配置问题总结",
+    //   summary: "本文总结了 Vite 在 Docker 开发环境中的配置问题，分析了端口监听错误和入口文件缺失的原因，并提供了详细的配置修复方案与调试步骤。",
+    //   tags: ["Vite", "Docker", "开发环境", "前端配置", "容器化"],
+    //   content_type: file.type || "text/plain",
+    //   file_size: file.size,
+    //   file_name: file.name
+    // }
+
+    // setIsExtracting(false)
+    // return mockData
 
   }
 
   // 创建定时轮询任务（轮询后端 /progress）
   const trackProgress = (batchId) => {
+    let repeatCount = 0
+    const maxWaitingCount = 20
     let timer = setInterval(async () => {
       try {
+        const prevProgress = progressRef.current
         const progressInfo = await knowledgeApi.progress(batchId)
         setUploadProgress(progressInfo)
+        // 获取异常信息的数据 提示有n件文件上传失败，分别是《》《》《》
+        // console.log("track_progress",prevProgress,progressInfo?.progress,prevProgress === progressInfo?.progress,repeatCount)
         // 到达 100% 清除定时器
         if (progressInfo?.is_last && progressInfo?.progress >= 100) {
           clearInterval(timer)
           timer = null
           setIsUploading(false)
           setIsUploaderOpen(false)
+          onUploaded?.()
+        } else if (progressInfo?.error_list?.length > 0) {
+          const errorList = progressInfo?.error_list
+          const errorCount = errorList.length
+          let text = `共有${errorCount}份文件上传失败，分别是`
+          for (let i = 0; i < errorCount; i++) {
+            text += `《${errorList[i].title}》` + (i === errorCount - 1 ? "" : "、")
+          }
+          GlobalAlert.error(text)
+          throw new Error("Track progress error")
+        } else if (prevProgress === progressInfo?.progress) {
+          if (repeatCount === maxWaitingCount) {
+            GlobalAlert.error("Track progress error")
+            throw new Error("Track progress error")
+          } else {
+            repeatCount++
+          }
+
         }
       } catch (error) {
         clearInterval(timer)
@@ -125,15 +155,15 @@ export const useDocumentUpload = ({ onUploaded }: { onUploaded?: (docs: any[]) =
         // eslint-disable-next-line no-await-in-loop
         await new Promise((resolve) => setTimeout(resolve, 300))
       }
-      onUploaded?.(newDocs)
+
     } catch (error) {
       console.log("Failed to upload documents: ", error)
       setIsUploading(false)
-    } 
+    }
 
 
 
-    return true 
+    return true
   }
 
   // 单条上传兼容入口（内部转调批量上传）

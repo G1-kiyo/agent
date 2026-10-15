@@ -1,5 +1,3 @@
-from typing import List
-
 from agents.ai_debater.state import (
     AgentState,
     ClassifySchemaList,
@@ -9,7 +7,7 @@ from agents.ai_debater.state import (
 from agents.ai_debater.prompts import get_style_prompt, COORDINATOR_PROMPT
 from capabilities.llm.factory import get_agent
 from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.types import Send
+from langgraph.types import Send, RetryPolicy, TimeoutPolicy
 from api.schemas.discussion import Style
 from langgraph.graph import StateGraph, START, END
 from utils.datetime import gendatetime, totimestamp
@@ -43,14 +41,12 @@ def classify(agent_state: AgentState):
         print(f"send_list:{send_list}")
         return send_list
     return END
-        
 
 
 async def subagent(agent_input: ClassifySchema):
     style = agent_input.get("style", None)
     theme = agent_input.get("theme", None)
     if style and theme:
-
         discussion_info = f"""
                 话题背景描述：{theme}
             """
@@ -93,8 +89,16 @@ async def summarize_result(agent_state: AgentState):
     return {"summary": []}
 
 
-agent_builder = StateGraph(AgentState)
+async def error_handler():
+    return {"opinions": [], "summary": ""}
 
+
+agent_builder = StateGraph(AgentState)
+agent_builder.set_node_defaults(
+    retry_policy=RetryPolicy(max_attempts=3),
+    timeout=TimeoutPolicy(run_timeout=30),
+    error_handler=error_handler,
+)
 styles = Style.values()
 agent_builder.add_node("coordinator", cooridinator)
 for style in styles:

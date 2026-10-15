@@ -72,9 +72,12 @@ export const useKnowledgeDocuments = () => {
       setTopics([])
     }
   }
-
+  const initKnowledgeInfo = () => {
+    Promise.all([fetchDocStats(), fetchHotTopics()])
+      .catch((error) => console.log("Failed to load knowledge: ", error))
+  }
   useEffect(() => {
-    Promise.all([fetchDocStats(), fetchHotTopics()]).catch((error)=>console.log("Failed to load knowledge: ",error))
+    initKnowledgeInfo()
   }, [])
 
   // 删除文档
@@ -106,6 +109,7 @@ export const useKnowledgeDocuments = () => {
     selectedTopic,
     documentInfo,
     fetchDataCallback,
+    initKnowledgeInfo,
     deleteDocument,
     filterByTopic,
 

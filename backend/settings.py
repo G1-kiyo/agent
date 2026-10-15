@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-from dotenv import load_dotenv, find_dotenv
 
 # 加载.env 文件
 # env_path = find_dotenv(filename=".env", raise_error_if_not_found=False)
@@ -56,7 +54,7 @@ class Settings:
         return f"postgresql+asyncpg://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}/{self.DATABASE_DB}"
 
     @property
-    def AI_CONNECTION_POOL(self):
+    def SYNC_DATABASE_URL(self):
         return f"postgresql://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}/{self.DATABASE_DB}"
 
     @property
@@ -71,7 +69,9 @@ class Settings:
 
     @property
     def REDIS_URL(self):
-        return f"{self.REDIS_HOST}://{self.REDIS_USER}:{self.REDIS_PORT}/{self.REDIS_DB}"
+        return (
+            f"{self.REDIS_HOST}://{self.REDIS_USER}:{self.REDIS_PORT}/{self.REDIS_DB}"
+        )
 
 
 settings = Settings()

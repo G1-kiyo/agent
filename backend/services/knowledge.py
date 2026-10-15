@@ -1,7 +1,9 @@
 import asyncio
-from typing import Annotated, List
+from typing import Annotated
 import uuid
+from fastapi.encoders import jsonable_encoder
 from fastapi import File, UploadFile
+from api.exceptions import CustomHTTPException
 from infrastructure.queue.tasks.rag_tasks import (
     manage_sub_tasks,
     track_knowledge_save_progress,
@@ -17,6 +19,8 @@ from api.schemas.knowledge import (
     KnowledgeBaseSaveRequest,
     Chat,
     DocsRequest,
+    Tag as TagModel,
+    KnowledgeStatus,
 )
 from api.deps import SessionDep, UserAuth
 from capabilities.llm.factory import get_agent
@@ -24,12 +28,13 @@ from agents.text_extractor.state import AnswerWithJustification
 from agents.text_extractor.prompts import SYSTEM_PROMPT
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from infrastructure.logging.logger import logger_handler, KnowledgeLogger
-from datetime import datetime, timezone
 from agents.knowledge_retrival.graph import compile_graph
 import json
 from sqlalchemy import select, text, func, desc, and_, distinct
-from sqlalchemy.orm import selectinload, events
+from sqlalchemy.orm import selectinload
 from datetime import datetime, timedelta, timezone
+from io import BytesIO
+import pdfplumber
 
 
 # 上传之后才能拿到远程文档链接 顺序返回和文件列表对应
@@ -40,7 +45,7 @@ async def upload_single_file(
     file_name: str, reader_data: bytes, oss_client: OssClientDep
 ):
     object_key = file_name
-    result = await oss_client.put_object(
+    await oss_client.put_object(
         oss.PutObjectRequest(
             bucket=settings.OSS_BUCKET, key=object_key, body=reader_data
         )
@@ -51,7 +56,7 @@ async def upload_single_file(
 # 批量文件上传
 @logger_handler("knowledge")
 async def upload_batch_file(
-    file_list: Annotated[List[UploadFile], File(...)], oss_client: OssClientDep
+    file_list: Annotated[list[UploadFile], File(...)], oss_client: OssClientDep
 ):
     semaphore = asyncio.Semaphore(10)
 
@@ -72,8 +77,8 @@ async def upload_batch_file(
 # 保存原始知识库信息
 @logger_handler("knowledge")
 async def store_original_knowledge_metadata(
-    metadata_list: List[KnowledgeBaseMetaData],
-    file_list: List[str],
+    metadata_list: list[KnowledgeBaseMetaData],
+    file_list: list[str],
     user_id,
     db: SessionDep,
 ):
@@ -92,6 +97,7 @@ async def store_original_knowledge_metadata(
             "source": metadata.source,
             "source_url": file_list[idx],
             "create_at": gendatetime(),
+            "status": KnowledgeStatus.PROCESSING.value,
             "user_id": user_id,
         }
         knowledge_data_list.append(knowledge_data)
@@ -128,18 +134,24 @@ async def store_original_knowledge_metadata(
                 }
             )
     insert_knowledge_sql = """
-            INSERT INTO knowledge (id,title,summary,source,source_url,create_at,user_id)
-            VALUES(:id,:title,:summary,:source,:source_url,:create_at,:user_id)
+            INSERT INTO knowledge (id,title,summary,source,source_url,create_at,status,user_id)
+            VALUES(:id,:title,:summary,:source,:source_url,:create_at,:status,:user_id)
+            RETURNING id, source_url
         """
     insert_tag_sql = "INSERT INTO tag (id,tag_name) VALUES(:id,:tag_name)"
     insert_re_sql = (
         "INSERT INTO knowledge_tag (knowledge_id,tag_id) VALUES(:knowledge_id,:tag_id)"
     )
-    await db.execute(text(insert_knowledge_sql), knowledge_data_list)
+    result = (
+        await db.execute(text(insert_knowledge_sql), knowledge_data_list)
+    ).fetchall()
+    json_result = jsonable_encoder([dict(r._mapping) for r in result])
     if insert_tags:
         await db.execute(text(insert_tag_sql), insert_tags)
     await db.execute(text(insert_re_sql), re_data)
     await db.commit()
+
+    return json_result
 
     # tasks = []
 
@@ -180,11 +192,11 @@ async def store_knowledge(
     )
 
     # 合并拿到的文件url和原始meta信息
-    await store_original_knowledge_metadata(
+    stored_files = await store_original_knowledge_metadata(
         knowledge_base.metadata_list, transformed_file_list, ua.id, db
     )
     # 执行存储任务
-    result = manage_sub_tasks.delay(batch_id, transformed_file_list)
+    manage_sub_tasks.delay(batch_id, stored_files)
     return batch_id
 
 
@@ -203,8 +215,27 @@ def track_progress_service(batch_id: str):
 # 读取字节流再解码
 @logger_handler("knowledge")
 async def extract_text(file: Annotated[UploadFile, File(...)]):
-    read_bytes = await file.read()
-    text_content = read_bytes.decode("utf-8")
+    # 判断是否符合规定后缀 提示（自定义异常）
+    required_ext = ["pdf", "md", "txt"]
+    ext = file.filename.split(".")[-1]
+    if ext not in required_ext:
+        raise CustomHTTPException(detail="wrong ext")
+    # 再判断是否为pdf 拼接每页的文字
+    content = await file.read()
+    text_content = ""
+    if ext == "pdf":
+        bytes_file = BytesIO(content)
+        with pdfplumber.open(bytes_file) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text_content += f"{page_text}\n"
+        # 解析出来如果没有文本，提示（自定义异常）
+        if not text_content:
+            raise CustomHTTPException(detail="no text is extracted")
+    else:
+        read_bytes = await file.read()
+        text_content = read_bytes.decode("utf-8")
     agent = get_agent(
         "text_extractor",
         {"force_schema": True, "output_shcema": AnswerWithJustification},
@@ -235,15 +266,15 @@ async def rag_knowledge(chat: Chat):
                 if isinstance(current_message, AIMessage) and hasattr(
                     current_message, "content"
                 ):
-                    content = getattr(current_message, "content")
+                    content = current_message.content
                     result = {"content": content}
-                    yield f"data: {json.dumps(result,ensure_ascii=False)}\n\n"
+                    yield f"data: {json.dumps(result, ensure_ascii=False)}\n\n"
 
     except Exception as e:
         KnowledgeLogger.error("rag knowledge error")
         # print(f"exception{str(e)}")
         error = {"content": str(e)}
-        yield f"data: {json.dumps(error,ensure_ascii=False)}\n\n"
+        yield f"data: {json.dumps(error, ensure_ascii=False)}\n\n"
 
 
 @logger_handler("knowledge")
@@ -251,6 +282,8 @@ async def get_hot_topics(topN: int, db: SessionDep):
     stmt = (
         select(Tag, func.count().label("tag_count"))
         .join(knowledge_tag, Tag.id == knowledge_tag.c.tag_id)
+        .join(Knowledge, Knowledge.id == knowledge_tag.c.knowledge_id)
+        .where(Knowledge.status == KnowledgeStatus.DONE.value)
         .group_by(Tag.id)
         .order_by("tag_count", desc("tag_count"))
     )
@@ -268,23 +301,29 @@ async def get_hot_topics(topN: int, db: SessionDep):
 # 包括文档总数、话题总数、本周新增，无需入参
 @logger_handler("knowledge")
 async def get_docs_stats(db: SessionDep):
+    common_stmt = select(func.count(distinct(knowledge_tag.c.knowledge_id))).join(
+        Knowledge, Knowledge.id == knowledge_tag.c.knowledge_id
+    )
     # 文档总数
-    knowledge_count_stmt = select(func.count(knowledge_tag.c.knowledge_id))
+    knowledge_count_stmt = common_stmt.where(
+        Knowledge.status == KnowledgeStatus.DONE.value
+    )
     knowledge_total = await db.scalar(knowledge_count_stmt)
 
     # 话题总数
-    tag_count_stmt = select(func.count(Tag.id))
+    tag_count_stmt = (
+        select(func.count(distinct(knowledge_tag.c.tag_id)))
+        .join(Knowledge, Knowledge.id == knowledge_tag.c.knowledge_id)
+        .where(Knowledge.status == KnowledgeStatus.DONE.value)
+    )
     tag_total = await db.scalar(tag_count_stmt)
 
     # 本周新增
-    weekly_knowledge_count_stmt = (
-        select(func.count(knowledge_tag.c.knowledge_id))
-        .join(Knowledge, Knowledge.id == knowledge_tag.c.knowledge_id)
-        .where(
-            and_(
-                datetime.now(timezone.utc) - timedelta(weeks=1) <= Knowledge.create_at,
-                Knowledge.create_at <= datetime.now(timezone.utc),
-            )
+    weekly_knowledge_count_stmt = common_stmt.where(
+        and_(
+            datetime.now(timezone.utc) - timedelta(weeks=1) <= Knowledge.create_at,
+            Knowledge.create_at <= datetime.now(timezone.utc),
+            Knowledge.status == KnowledgeStatus.DONE.value,
         )
     )
     weekly_knowledge_total = await db.scalar(weekly_knowledge_count_stmt)
@@ -307,7 +346,12 @@ async def get_docs(docs_request: DocsRequest, db: SessionDep):
             select(Tag, knowledge_tag.c.knowledge_id.label("knowledge_id"))
             .join(knowledge_tag, Tag.id == knowledge_tag.c.tag_id)
             .join(Knowledge, Knowledge.id == knowledge_tag.c.knowledge_id)
-            .where(Tag.tag_name == topic)
+            .where(
+                and_(
+                    Tag.tag_name == topic,
+                    Knowledge.status == KnowledgeStatus.DONE.value,
+                )
+            )
             .limit(page_size)
             .offset((page_num - 1) * page_size)
             .order_by(Knowledge.id, desc(Knowledge.id))
@@ -341,7 +385,12 @@ async def get_docs(docs_request: DocsRequest, db: SessionDep):
         knowledge_count_stmt = (
             select(func.count(distinct(knowledge_tag.c.knowledge_id)))
             .join(Tag, knowledge_tag.c.tag_id == Tag.id)
-            .where(Tag.tag_name == topic)
+            .where(
+                and_(
+                    Tag.tag_name == topic,
+                    Knowledge.status == KnowledgeStatus.DONE.value,
+                )
+            )
         )
         total = await db.scalar(knowledge_count_stmt)
         await db.commit()
@@ -363,6 +412,7 @@ async def get_docs(docs_request: DocsRequest, db: SessionDep):
                     datetime.now(timezone.utc) - timedelta(weeks=1)
                     <= Knowledge.create_at,
                     Knowledge.create_at <= datetime.now(timezone.utc),
+                    Knowledge.status == KnowledgeStatus.DONE.value,
                 )
             )
         )
@@ -375,6 +425,7 @@ async def get_docs(docs_request: DocsRequest, db: SessionDep):
                     datetime.now(timezone.utc) - timedelta(weeks=1)
                     <= Knowledge.create_at,
                     Knowledge.create_at <= datetime.now(timezone.utc),
+                    Knowledge.status == KnowledgeStatus.DONE.value,
                 )
             )
             .limit(page_size)
@@ -390,7 +441,7 @@ async def get_docs(docs_request: DocsRequest, db: SessionDep):
                 "source": k.source,
                 "source_url": k.source_url,
                 "create_at": totimestamp(k.create_at),
-                "tags": k.tags,
+                "tags": [TagModel.model_validate(tag) for tag in k.tags],
             }
             for k in knowledge_result
         ]
